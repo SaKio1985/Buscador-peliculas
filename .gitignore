@@ -16,6 +16,15 @@ coverage
 
 /cypress/videos/
 /cypress/screenshots/
+# Archivos de entorno local
+# ¡MUY IMPORTANTE! NO SUBIR LAS API KEYS
+.env.local
+.env.*.local
+
+# Archivos de entorno (excepto las plantillas)
+.env
+.env.development
+.env.production
 
 # Editor directories and files
 .vscode/*

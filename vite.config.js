@@ -2,26 +2,22 @@
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
-// 1. Importa el plugin de Vuetify
 import vuetify from 'vite-plugin-vuetify'
 
-// (No es necesario importar vueDevTools, se inyecta automáticamente si está instalado)
+// 1. Importamos fileURLToPath y URL de Node.js
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [
     vue(),
-
-    // 2. Añade el plugin de Vuetify AQUÍ
     vuetify({
-      autoImport: true, // Esto importa automáticamente los componentes que usas
+      autoImport: true,
     }),
   ],
-  // La configuración de alias y resolve no es estrictamente necesaria para que esto funcione,
-  // pero la mantenemos por si la usas en el futuro.
   resolve: {
+    // 2. Esta es la forma correcta y moderna de crear el alias
     alias: {
-      '@': new URL('./src', import.meta.url).pathname,
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 })

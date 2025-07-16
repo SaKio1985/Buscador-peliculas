@@ -1,41 +1,77 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+
+// Importaciones (sin cambios)
+import { searchOMDb, getOMDbDetails } from '@/services/omdb.js'
+import { searchTMDB, getTMDBDetails } from '@/services/tmdb.js'
+import { searchJikan, getJikanDetails } from '@/services/jikan.js'
+import { adaptSearchResults, adaptDetails } from '@/services/dataAdapter.js'
 
 // --- Estado de la aplicación ---
 const searchTerm = ref('')
+const searchType = ref(null) // <-- CAMBIO CLAVE: Inicia en null
 const searchResults = ref([])
-const movie = ref(null)
+const selectedItem = ref(null)
 const loading = ref(false)
 const error = ref(null)
 
-// --- Lógica ---
+// Texto dinámico para el campo de búsqueda
+const placeholderText = computed(() => {
+  if (searchType.value === 'tmdb') return 'Buscar películas en español...'
+  if (searchType.value === 'omdb') return 'Buscar películas en inglés...'
+  if (searchType.value === 'jikan') return 'Buscar anime...'
+  return 'Buscar...'
+})
 
-// Función para buscar la lista de películas
-const searchMovie = async () => {
-  // Usamos .value para acceder al contenido del ref
+// --- Lógica Principal ---
+
+// NUEVA FUNCIÓN: Se ejecuta al hacer clic en un botón de fuente
+const selectSearchSource = (source) => {
+  searchType.value = source
+  // Limpiamos todo para una nueva sesión de búsqueda
+  error.value = null
+  searchResults.value = []
+  selectedItem.value = null
+}
+
+// FUNCIÓN MODIFICADA: Ahora reinicia la selección de fuente
+const goBack = () => {
+  selectedItem.value = null
+  searchResults.value = []
+  searchType.value = null // <-- Vuelve a la pantalla de selección de fuente
+  searchTerm.value = '' // Limpia el texto de búsqueda
+  error.value = null
+}
+
+// handleSearch y getDetails se quedan exactamente igual que antes.
+// No es necesario copiarlas de nuevo si ya las tienes.
+
+const handleSearch = async () => {
   if (searchTerm.value.trim() === '') {
-    // <-- CORREGIDO
     error.value = 'Por favor, escribe un término de búsqueda.'
     return
   }
-
   loading.value = true
-  movie.value = null
+  selectedItem.value = null
   searchResults.value = []
   error.value = null
 
   try {
-    const apiKey = import.meta.env.VITE_OMDB_API_KEY
-    // Usamos .value para construir la URL
-    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(searchTerm.value)}&apikey=${apiKey}` // <-- CORREGIDO
-
-    const response = await fetch(url)
-    const data = await response.json()
-
-    if (data.Response === 'False') {
-      throw new Error(data.Error)
-    } else {
-      searchResults.value = data.Search
+    let rawResults
+    switch (searchType.value) {
+      case 'omdb':
+        rawResults = await searchOMDb(searchTerm.value)
+        break
+      case 'tmdb':
+        rawResults = await searchTMDB(searchTerm.value)
+        break
+      case 'jikan':
+        rawResults = await searchJikan(searchTerm.value)
+        break
+    }
+    searchResults.value = adaptSearchResults(rawResults, searchType.value)
+    if (searchResults.value.length === 0) {
+      error.value = 'No se encontraron resultados para tu búsqueda.'
     }
   } catch (e) {
     error.value = e.message
@@ -44,25 +80,25 @@ const searchMovie = async () => {
   }
 }
 
-// Función para obtener los detalles de una película específica
-const getMovieDetails = async (imdbID) => {
+const getDetails = async (item) => {
   loading.value = true
-  movie.value = null
+  selectedItem.value = null
   error.value = null
-
   try {
-    const apiKey = import.meta.env.VITE_OMDB_API_KEY
-    const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`
-
-    const response = await fetch(url)
-    const data = await response.json()
-
-    if (data.Response === 'False') {
-      throw new Error(data.Error)
-    } else {
-      movie.value = data
-      searchResults.value = []
+    let rawDetails
+    switch (item.source) {
+      case 'omdb':
+        rawDetails = await getOMDbDetails(item.id)
+        break
+      case 'tmdb':
+        rawDetails = await getTMDBDetails(item.id)
+        break
+      case 'jikan':
+        rawDetails = await getJikanDetails(item.id)
+        break
     }
+    selectedItem.value = adaptDetails(rawDetails, item.source)
+    searchResults.value = []
   } catch (e) {
     error.value = e.message
   } finally {
@@ -77,136 +113,203 @@ const getMovieDetails = async (imdbID) => {
       <v-container>
         <v-row justify="center">
           <v-col cols="12" md="10" lg="8">
-            <!-- Título y Buscador (sin cambios) -->
-            <h1 class="text-h3 text-center mb-4 text-primary">Buscador de Películas</h1>
-            <form @submit.prevent="searchMovie" class="d-flex ga-2 mb-8">
-              <v-text-field
-                v-model="searchTerm"
-                label="Título de la película (ej: Ghost in the Shell)"
-                variant="solo-filled"
-                hide-details
-                @keydown.enter="searchMovie"
-              ></v-text-field>
-              <v-btn
-                type="submit"
-                color="primary"
-                size="large"
-                :loading="loading"
-                :disabled="loading"
-              >
-                Buscar
-              </v-btn>
-            </form>
+            <!-- ======================================================= -->
+            <!-- VISTA 1: SELECCIÓN DE FUENTE (CUANDO searchType ES NULL) -->
+            <!-- ======================================================= -->
+            <div v-if="!searchType">
+              <h1 class="text-h3 text-center mb-8 text-primary">Buscador Universal</h1>
+              <p class="text-center text-h6 mb-8 text-grey-lighten-1">¿Qué quieres buscar hoy?</p>
 
-            <!-- Alerta de Error (sin cambios) -->
-            <v-alert
-              v-if="error"
-              type="error"
-              variant="tonal"
-              closable
-              class="mb-8"
-              :text="`Error: ${error}`"
-              @update:model-value="error = null"
-            ></v-alert>
-
-            <!-- AÑADIR ESTO: Sección para la lista de resultados de la búsqueda -->
-            <v-row v-if="searchResults.length > 0" dense>
-              <v-col v-for="result in searchResults" :key="result.imdbID" cols="12" sm="6" md="4">
-                <!-- Al hacer clic en la tarjeta, llamamos a getMovieDetails -->
-                <v-card
-                  @click="getMovieDetails(result.imdbID)"
-                  hover
-                  class="fill-height d-flex flex-column"
-                >
-                  <v-img :src="result.Poster" aspect-ratio="2/3" cover>
-                    <!-- Fallback por si no hay póster -->
-                    <template v-slot:error>
-                      <v-sheet
-                        color="grey-darken-3"
-                        class="d-flex align-center justify-center fill-height"
-                      >
-                        <div class="text-center">
-                          <v-icon icon="mdi-movie-off" size="x-large"></v-icon>
-                          <div class="text-caption">Sin Póster</div>
-                        </div>
-                      </v-sheet>
-                    </template>
-                  </v-img>
-                  <div class="d-flex flex-column flex-grow-1">
-                    <v-card-title class="text-subtitle-1">{{ result.Title }}</v-card-title>
-                    <v-card-subtitle>{{ result.Year }}</v-card-subtitle>
-                    <v-spacer></v-spacer>
-                    <v-card-actions>
-                      <v-chip size="small" prepend-icon="mdi-information-outline">{{
-                        result.Type
-                      }}</v-chip>
-                    </v-card-actions>
-                  </div>
-                </v-card>
-              </v-col>
-            </v-row>
-            <!-- FIN DE LA SECCIÓN AÑADIDA -->
-
-            <!-- Tarjeta de la Película (sin cambios en la estructura interna) -->
-            <v-card v-if="movie" :loading="loading" class="mt-4">
-              <!-- ... Todo el código de la tarjeta de detalles que ya tienes está perfecto ... -->
-              <v-row no-gutters>
-                <v-col cols="12" sm="4">
-                  <v-img :src="movie.Poster" cover height="100%">
-                    <template v-slot:error>
-                      <v-img
-                        src="https://via.placeholder.com/300x450.png?text=No+Poster"
-                        height="100%"
-                      ></v-img>
-                    </template>
-                  </v-img>
+              <v-row>
+                <!-- Botón TMDB -->
+                <v-col cols="12" md="4">
+                  <v-card @click="selectSearchSource('tmdb')" class="source-card" hover>
+                    <v-img src="/images/tmdb-logo.avif" contain height="80" class="my-4"></v-img>
+                    <v-card-text class="text-center font-weight-bold">
+                      Películas (tmdb)
+                    </v-card-text>
+                  </v-card>
                 </v-col>
 
-                <v-col cols="12" sm="8">
-                  <v-card-title class="text-h4 mt-2">
-                    {{ movie.Title }}
-                  </v-card-title>
-                  <v-card-subtitle class="text-h6">
-                    {{ movie.Year }} · {{ movie.Genre }}
-                  </v-card-subtitle>
-
-                  <v-card-text>
-                    <div class="d-flex flex-wrap ga-2 my-4">
-                      <v-chip
-                        v-for="rating in movie.Ratings"
-                        :key="rating.Source"
-                        variant="outlined"
-                        prepend-icon="mdi-star-circle"
-                      >
-                        <span v-if="rating.Source === 'Rotten Tomatoes'">
-                          <strong>Crítica (RT):</strong> {{ rating.Value }}
-                        </span>
-                        <span v-else>
-                          <strong>{{ rating.Source }}:</strong> {{ rating.Value }}
-                        </span>
-                      </v-chip>
+                <!-- Botón OMDb -->
+                <v-col cols="12" md="4">
+                  <v-card @click="selectSearchSource('omdb')" class="source-card" hover>
+                    <div class="d-flex justify-center align-center my-4" style="height: 80px">
+                      <h2 class="text-h4 font-weight-black">OMDb</h2>
                     </div>
+                    <v-card-text class="text-center font-weight-bold">
+                      Películas (omdb)
+                    </v-card-text>
+                  </v-card>
+                </v-col>
 
-                    <h3 class="text-h6 text-primary mb-2">Sinopsis</h3>
-                    <p>{{ movie.Plot }}</p>
-
-                    <div class="mt-4 text-body-2">
-                      <div><strong>Director:</strong> {{ movie.Director }}</div>
-                      <div><strong>Actores:</strong> {{ movie.Actors }}</div>
-                    </div>
-                  </v-card-text>
+                <!-- Botón Jikan (MyAnimeList) -->
+                <v-col cols="12" md="4">
+                  <v-card @click="selectSearchSource('jikan')" class="source-card" hover>
+                    <v-img src="/images/mal-logo.avif" contain height="80" class="my-4"></v-img>
+                    <v-card-text class="text-center font-weight-bold"> Anime </v-card-text>
+                  </v-card>
                 </v-col>
               </v-row>
-            </v-card>
+            </div>
 
-            <!-- MODIFICAR ESTO: Mensaje Inicial -->
-            <!-- Ahora debe comprobar que no se esté mostrando NADA (ni resultados, ni película, ni cargando, ni error) -->
+            <!-- ====================================================== -->
+            <!-- VISTA 2: BÚSQUEDA ACTIVA (CUANDO searchType TIENE VALOR) -->
+            <!-- ====================================================== -->
+            <div v-else>
+              <!-- Botón para volver a la selección de fuente -->
+              <v-btn
+                v-if="!selectedItem"
+                @click="goBack"
+                prepend-icon="mdi-arrow-left"
+                variant="text"
+                class="mb-4"
+              >
+                Cambiar fuente
+              </v-btn>
+
+              <!-- Botón para volver a los resultados de búsqueda -->
+              <v-btn
+                v-if="selectedItem"
+                @click="selectedItem = null"
+                prepend-icon="mdi-arrow-left"
+                variant="text"
+                class="mb-4"
+              >
+                Volver a los resultados
+              </v-btn>
+
+              <!-- Formulario de Búsqueda -->
+              <form v-if="!selectedItem" @submit.prevent="handleSearch" class="d-flex ga-2 mb-8">
+                <v-text-field
+                  v-model="searchTerm"
+                  :label="placeholderText"
+                  variant="solo-filled"
+                  hide-details
+                  clearable
+                  autofocus
+                  @keydown.enter="handleSearch"
+                ></v-text-field>
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  size="large"
+                  :loading="loading"
+                  :disabled="loading"
+                >
+                  Buscar
+                </v-btn>
+              </form>
+
+              <!-- Alerta de Error -->
+              <v-alert
+                v-if="error"
+                type="error"
+                variant="tonal"
+                closable
+                class="mb-8"
+                :text="error"
+                @update:model-value="error = null"
+              ></v-alert>
+
+              <!-- Lista de Resultados de Búsqueda -->
+              <v-row v-if="searchResults.length > 0" dense>
+                <v-col
+                  v-for="result in searchResults"
+                  :key="`${result.source}-${result.id}`"
+                  cols="12"
+                  sm="6"
+                  md="4"
+                >
+                  <v-card @click="getDetails(result)" hover class="fill-height d-flex flex-column">
+                    <v-img :src="result.poster" aspect-ratio="2/3" cover>
+                      <template v-slot:error>
+                        <v-sheet
+                          color="grey-darken-3"
+                          class="d-flex align-center justify-center fill-height"
+                        >
+                          <div class="text-center">
+                            <v-icon icon="mdi-movie-off" size="x-large"></v-icon>
+                            <div class="text-caption mt-2">Sin Póster</div>
+                          </div>
+                        </v-sheet>
+                      </template>
+                    </v-img>
+                    <div class="d-flex flex-column flex-grow-1 pa-2">
+                      <v-card-title class="text-subtitle-1">{{ result.title }}</v-card-title>
+                      <v-card-subtitle>{{ result.year }}</v-card-subtitle>
+                      <v-spacer></v-spacer>
+                      <v-card-actions>
+                        <v-chip
+                          size="small"
+                          prepend-icon="mdi-television-play"
+                          class="text-capitalize"
+                          >{{ result.type }}</v-chip
+                        >
+                      </v-card-actions>
+                    </div>
+                  </v-card>
+                </v-col>
+              </v-row>
+
+              <!-- Tarjeta de Detalles del Item Seleccionado -->
+              <v-card v-if="selectedItem" :loading="loading" class="mt-4">
+                <v-row no-gutters>
+                  <v-col cols="12" md="4">
+                    <v-img :src="selectedItem.poster" cover class="fill-height">
+                      <template v-slot:error>
+                        <v-sheet
+                          color="grey-darken-3"
+                          class="d-flex align-center justify-center fill-height"
+                        >
+                          <div class="text-center">
+                            <v-icon icon="mdi-movie-off" size="x-large"></v-icon>
+                          </div>
+                        </v-sheet>
+                      </template>
+                    </v-img>
+                  </v-col>
+                  <v-col cols="12" md="8">
+                    <v-card-title class="text-h4 mt-2">{{ selectedItem.title }}</v-card-title>
+                    <v-card-subtitle class="text-h6"
+                      >{{ selectedItem.year }} · {{ selectedItem.genre }}</v-card-subtitle
+                    >
+                    <v-card-text>
+                      <div class="d-flex flex-wrap ga-2 my-4">
+                        <v-chip
+                          v-for="(rating, index) in selectedItem.ratings"
+                          :key="index"
+                          variant="outlined"
+                          prepend-icon="mdi-star-circle"
+                        >
+                          <strong>{{ rating.source }}:</strong> {{ rating.value }}
+                        </v-chip>
+                      </div>
+                      <h3 class="text-h6 text-primary mb-2">Sinopsis</h3>
+                      <p class="text-body-1">{{ selectedItem.plot }}</p>
+                      <div class="mt-4 text-body-2">
+                        <div v-if="selectedItem.director">
+                          <strong>Director/Estudio:</strong> {{ selectedItem.director }}
+                        </div>
+                        <div v-if="selectedItem.actors">
+                          <strong>Actores/Personajes:</strong> {{ selectedItem.actors }}
+                        </div>
+                      </div>
+                    </v-card-text>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </div>
+
+            <!-- ¡No olvides la atribución a TMDB! -->
             <div
-              v-if="!movie && searchResults.length === 0 && !loading && !error"
-              class="text-center text-grey mt-16"
+              class="text-center mt-12"
+              v-if="searchType === 'tmdb' || selectedItem?.source === 'tmdb'"
             >
-              <v-icon size="64" icon="mdi-movie-search-outline"></v-icon>
-              <p class="mt-4 text-h6">Usa el buscador para encontrar una película</p>
+              <p class="text-caption text-grey">
+                This product uses the TMDB API but is not endorsed or certified by TMDB.
+              </p>
+              <v-img src="/images/tmdb-logo.svg" height="20" contain></v-img>
             </div>
           </v-col>
         </v-row>
@@ -216,9 +319,17 @@ const getMovieDetails = async (imdbID) => {
 </template>
 
 <style scoped>
-/* ¡Casi no necesitamos CSS! Vuetify se encarga de casi todo. */
-/* Podemos añadir pequeños ajustes si es necesario */
+.source-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.source-card:hover {
+  transform: translateY(-5px);
+  border-color: rgb(var(--v-theme-primary));
+}
+
 .v-card {
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.2s ease-in-out;
 }
 </style>
