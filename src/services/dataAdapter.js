@@ -48,6 +48,7 @@ export const adaptDetails = (details, apiSource) => {
         director: details.Director,
         actors: details.Actors,
         ratings: details.Ratings?.map((r) => ({ source: r.Source, value: r.Value })) || [],
+        cast: [], // OMDb no proporciona fotos del reparto
       }
     case 'tmdb':
       return {
@@ -57,7 +58,7 @@ export const adaptDetails = (details, apiSource) => {
           ? `https://image.tmdb.org/t/p/w500${details.poster_path}`
           : null,
         genre: details.genres?.map((g) => g.name).join(', '),
-        plot: details.overview, // La sinopsis viene en 'overview'
+        plot: details.overview,
         director: details.credits?.crew?.find((c) => c.job === 'Director')?.name || 'N/A',
         actors:
           details.credits?.cast
@@ -65,8 +66,27 @@ export const adaptDetails = (details, apiSource) => {
             .map((a) => a.name)
             .join(', ') || 'N/A',
         ratings: [{ source: 'TMDB Score', value: `${details.vote_average.toFixed(1)} / 10` }],
+        // ¡NUEVA SECCIÓN! Procesamos el reparto
+        cast:
+          details.credits?.cast
+            ?.slice(0, 12) // Tomamos los primeros 12 actores
+            .map((actor) => ({
+              name: actor.name,
+              character: actor.character,
+              photo: actor.profile_path
+                ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                : null,
+            })) || [],
       }
-    case 'jikan':
+    case 'jikan': {
+      console.log('DATOS BRUTOS DE JIKAN:', details) // Línea de depuración
+      let characters = details.characters?.filter((c) => c.role === 'Main')
+
+      // Si no hay personajes principales, tomamos los primeros que aparezcan
+      if (!characters || characters.length === 0) {
+        characters = details.characters
+      }
+
       return {
         title: details.title,
         year:
@@ -75,14 +95,25 @@ export const adaptDetails = (details, apiSource) => {
         poster: details.images?.jpg?.large_image_url || null,
         genre: details.genres?.map((g) => g.name).join(', '),
         plot: details.synopsis,
-        director: details.studios?.map((s) => s.name).join(', ') || 'N/A', // Jikan no tiene un "director" claro, usamos el estudio
+        director: details.studios?.map((s) => s.name).join(', ') || 'N/A',
         actors:
-          details.characters
+          characters
             ?.slice(0, 5)
             .map((c) => c.character.name)
             .join(', ') || 'N/A',
-        ratings: [{ source: 'MyAnimeList Score', value: `${details.score} / 10` }],
+        ratings: [{ source: 'MyAnimeList Score', value: `${details.score || 'N/A'}` }],
+        // Procesamos el reparto con la lista de personajes que hemos asegurado
+        cast:
+          characters?.slice(0, 12).map((char) => ({
+            name: char.character.name,
+            // En Jikan, el "actor" es el actor de voz (Seiyuu)
+            character:
+              char.voice_actors?.find((va) => va.language === 'Japanese')?.person.name ||
+              'Seiyuu N/A',
+            photo: char.character.images?.jpg?.image_url || null,
+          })) || [],
       }
+    }
     default:
       return null
   }

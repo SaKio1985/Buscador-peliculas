@@ -294,6 +294,29 @@ const getDetails = async (item) => {
                         <div v-if="selectedItem.actors">
                           <strong>Actores/Personajes:</strong> {{ selectedItem.actors }}
                         </div>
+                        <div v-if="selectedItem.cast && selectedItem.cast.length > 0" class="mt-6">
+                          <h3 class="text-h6 text-primary mb-4">Reparto Principal</h3>
+                          <v-slide-group show-arrows>
+                            <v-slide-group-item
+                              v-for="(actor, index) in selectedItem.cast"
+                              :key="index"
+                            >
+                              <div class="actor-card text-center mx-2">
+                                <v-avatar size="80">
+                                  <v-img :src="actor.photo" :alt="actor.name">
+                                    <template v-slot:error>
+                                      <v-icon color="grey-darken-1" size="60"
+                                        >mdi-account-circle</v-icon
+                                      >
+                                    </template>
+                                  </v-img>
+                                </v-avatar>
+                                <div class="actor-name mt-2">{{ actor.name }}</div>
+                                <div class="character-name text-caption">{{ actor.character }}</div>
+                              </div>
+                            </v-slide-group-item>
+                          </v-slide-group>
+                        </div>
                       </div>
                     </v-card-text>
                   </v-col>
@@ -301,7 +324,6 @@ const getDetails = async (item) => {
               </v-card>
             </div>
 
-            <!-- ¡No olvides la atribución a TMDB! -->
             <div
               class="text-center mt-12"
               v-if="searchType === 'tmdb' || selectedItem?.source === 'tmdb'"
@@ -331,5 +353,16 @@ const getDetails = async (item) => {
 
 .v-card {
   transition: transform 0.2s ease-in-out;
+}
+.actor-card {
+  width: 100px; /* Ancho fijo para cada tarjeta de actor */
+}
+.actor-name {
+  font-weight: 500;
+  white-space: normal; /* Permite que el nombre ocupe varias líneas */
+  line-height: 1.2;
+}
+.character-name {
+  color: #aaa; /* Un color más suave para el nombre del personaje */
 }
 </style>

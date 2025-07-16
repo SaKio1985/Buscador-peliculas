@@ -19,10 +19,9 @@ export const searchTMDB = async (query) => {
 }
 
 export const getTMDBDetails = async (id) => {
-  const response = await fetch(
-    `${BASE_URL}/movie/${id}?language=es-ES&append_to_response=credits`,
-    options,
-  )
+  // Esta parte es la que nos trae los créditos (reparto)
+  const url = `${BASE_URL}/movie/${id}?language=es-ES&append_to_response=credits`
+  const response = await fetch(url, options)
   const data = await response.json()
   return data
 }
