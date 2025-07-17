@@ -1,4 +1,4 @@
-# 🎬 Vuetify Movie Finder
+# 🎬 Buscador Peliculas y Anime
 
 <div align="center">
   <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" alt="Vue.js">
@@ -162,7 +162,7 @@ graph TD
 <div align="center">
   <img src="public/images/screenshots/home.avif" alt="Pantalla Principal" width="300">
   <img src="public/images/screenshots/search.avif" alt="Búsqueda" width="300">
-  <img src="public/images/screenshots/details.avif" alt="Detalles" width="300">
+  <img src="public/images/screenshots/details1avif" alt="Detalles" width="300">
     <img src="public/images/screenshots/details2.avif" alt="Detalles2" width="300">
       <img src="public/images/screenshots/details3.avif" alt="Detalles3" width="300">
 </div>
@@ -431,5 +431,5 @@ Si este proyecto te fue útil, por favor considera:
 - 📢 Compartir con otros desarrolladores
 
 <div align="center">
-  <h3>¡Gracias por usar Vuetify Movie Finder! 🎬</h3>
+  <h3>¡Gracias por usar Buscador Peliculas y Anime 🎬</h3>
 </div>
