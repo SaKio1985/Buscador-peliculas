@@ -13,10 +13,10 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/license/username/vuetify-movie-finder?style=flat-square" alt="License">
-  <img src="https://img.shields.io/github/stars/username/vuetify-movie-finder?style=flat-square" alt="Stars">
-  <img src="https://img.shields.io/github/forks/username/vuetify-movie-finder?style=flat-square" alt="Forks">
-  <img src="https://img.shields.io/github/issues/username/vuetify-movie-finder?style=flat-square" alt="Issues">
+  <img src="https://img.shields.io/github/license/SaKio1985/Buscador-peliculas?style=flat-square" alt="License">
+  <img src="https://img.shields.io/github/stars/SaKio1985/Buscador-peliculas?style=flat-square" alt="Stars">
+  <img src="https://img.shields.io/github/forks/SaKio1985/Buscador-peliculas?style=flat-square" alt="Forks">
+  <img src="https://img.shields.io/github/issues/SaKio1985/Buscador-peliculas?style=flat-square" alt="Issues">
 </div>
 
 ---
@@ -323,7 +323,7 @@ Las solicitudes de nuevas características son bienvenidas. Abre un issue etique
 
 ### 🚨 Reportar Vulnerabilidades
 
-Si encuentras una vulnerabilidad de seguridad, por favor envía un email a security@tu-dominio.com en lugar de usar el sistema de issues público.
+Si encuentras una vulnerabilidad de seguridad, por favor crea un issue en el repositorio marcado como "security".
 
 ---
 
@@ -389,19 +389,17 @@ Objetivo: Mantener > 80% de cobertura de código
 - [Documentación de Vue 3](https://vuejs.org/)
 - [Documentación de Vuetify 3](https://vuetifyjs.com/)
 - [Guía de Vite](https://vitejs.dev/)
-- [API Reference](./docs/api-reference.md)
 
 ### 🎓 Tutoriales
 
-- [Cómo integrar una nueva API](./docs/add-new-api.md)
-- [Personalización de temas](./docs/theme-customization.md)
-- [Deploy en producción](./docs/deployment.md)
+- [Cómo integrar una nueva API](#-añadir-nuevas-apis)
+- [Personalización de temas](#-personalización-de-tema)
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
@@ -417,10 +415,10 @@ Este proyecto está licenciado bajo la Licencia MIT. Ver el archivo [LICENSE](LI
 
 ## 👨‍💻 Autor
 
-**Tu Nombre**
+**Iban Dorado**
 
 - GitHub: [@SaKio1985](https://github.com/SaKio1985)
-- LinkedIn: [Tu Perfil](www.linkedin.com/in/iban-dorado-171a4a24b)
+- LinkedIn: [Iban Dorado](https://www.linkedin.com/in/iban-dorado-171a4a24b)
 
 ---
 
