@@ -162,7 +162,7 @@ graph TD
 <div align="center">
   <img src="public/images/screenshots/home.avif" alt="Pantalla Principal" width="300">
   <img src="public/images/screenshots/search.avif" alt="Búsqueda" width="300">
-  <img src="public/images/screenshots/details1avif" alt="Detalles" width="300">
+  <img src="public/images/screenshots/details1.avif" alt="Detalles" width="300">
     <img src="public/images/screenshots/details2.avif" alt="Detalles2" width="300">
       <img src="public/images/screenshots/details3.avif" alt="Detalles3" width="300">
 </div>
