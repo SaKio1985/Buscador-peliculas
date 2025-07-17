@@ -117,7 +117,14 @@ const getDetails = async (item) => {
             <!-- VISTA 1: SELECCIÓN DE FUENTE (CUANDO searchType ES NULL) -->
             <!-- ======================================================= -->
             <div v-if="!searchType">
-              <h1 class="text-h3 text-center mb-8 text-primary">Buscador Universal</h1>
+              <v-img
+                src="/images/LogoWeb.avif"
+                aspect-ratio="16/5"
+                max-width="700"
+                contain
+                class="mx-auto mb-8"
+                alt="Logo"
+              />
               <p class="text-center text-h6 mb-8 text-grey-lighten-1">¿Qué quieres buscar hoy?</p>
 
               <v-row>
