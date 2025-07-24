@@ -6,6 +6,8 @@ import { searchOMDb, getOMDbDetails } from '@/services/omdb.js'
 import { searchTMDB, getTMDBDetails } from '@/services/tmdb.js'
 import { searchJikan, getJikanDetails } from '@/services/jikan.js'
 import { adaptSearchResults, adaptDetails } from '@/services/dataAdapter.js'
+import HomeButton from '@/components/HomeButton.vue'
+import SearchBar from '@/components/SearchBar.vue'
 
 // --- Estado de la aplicación ---
 const searchTerm = ref('')
@@ -130,32 +132,44 @@ const getDetails = async (item) => {
               <v-row>
                 <!-- Botón TMDB -->
                 <v-col cols="12" md="4">
-                  <v-card @click="selectSearchSource('tmdb')" class="source-card" hover>
-                    <v-img src="/images/tmdb-logo.avif" contain height="80" class="my-4"></v-img>
-                    <v-card-text class="text-center font-weight-bold">
-                      Películas (tmdb)
-                    </v-card-text>
-                  </v-card>
+                  <HomeButton
+                    imagen="/images/tmdb-logo.avif"
+                    titulo="TMDB"
+                    api="tmdb"
+                    @selectSearchSource="selectSearchSource"
+                  />
                 </v-col>
 
                 <!-- Botón OMDb -->
                 <v-col cols="12" md="4">
-                  <v-card @click="selectSearchSource('omdb')" class="source-card" hover>
+                  <HomeButton
+                    imagen="/images/omdb-logo.avif"
+                    titulo="IMDB"
+                    api="omdb"
+                    @selectSearchSource="selectSearchSource"
+                  />
+                  <!--                   <v-card @click="selectSearchSource('omdb')" class="source-card" hover>
                     <div class="d-flex justify-center align-center my-4" style="height: 80px">
                       <h2 class="text-h4 font-weight-black">OMDb</h2>
                     </div>
                     <v-card-text class="text-center font-weight-bold">
                       Películas (omdb)
                     </v-card-text>
-                  </v-card>
+                  </v-card> -->
                 </v-col>
 
                 <!-- Botón Jikan (MyAnimeList) -->
                 <v-col cols="12" md="4">
-                  <v-card @click="selectSearchSource('jikan')" class="source-card" hover>
+                  <HomeButton
+                    imagen="/images/mal-logo.avif"
+                    titulo="Anime"
+                    api="jikan"
+                    @selectSearchSource="selectSearchSource"
+                  />
+                  <!--                   <v-card @click="selectSearchSource('jikan')" class="source-card" hover>
                     <v-img src="/images/mal-logo.avif" contain height="80" class="my-4"></v-img>
                     <v-card-text class="text-center font-weight-bold"> Anime </v-card-text>
-                  </v-card>
+                  </v-card> -->
                 </v-col>
               </v-row>
             </div>
@@ -187,7 +201,7 @@ const getDetails = async (item) => {
               </v-btn>
 
               <!-- Formulario de Búsqueda -->
-              <form v-if="!selectedItem" @submit.prevent="handleSearch" class="d-flex ga-2 mb-8">
+              <!--    <form v-if="!selectedItem" @submit.prevent="handleSearch" class="d-flex ga-2 mb-8">
                 <v-text-field
                   v-model="searchTerm"
                   :label="placeholderText"
@@ -206,7 +220,14 @@ const getDetails = async (item) => {
                 >
                   Buscar
                 </v-btn>
-              </form>
+              </form> -->
+              <SearchBar
+                v-if="!selectedItem"
+                v-model="searchTerm"
+                :placeholder-text="placeholderText"
+                :loading="loading"
+                @search="handleSearch"
+              />
 
               <!-- Alerta de Error -->
               <v-alert
