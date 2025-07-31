@@ -5,11 +5,11 @@ defineProps({
     required: true,
   },
 })
-const emit = defineEmits(['click'])
+const emit = defineEmits(['cardclick'])
 </script>
 
 <template>
-  <v-card hover class="fill-height d-flex flex-column" @click="emit('click')">
+  <v-card hover class="fill-height d-flex flex-column" @click="emit('cardclick')">
     <v-img :src="result.poster" aspect-ratio="2/3" cover>
       <template v-slot:error>
         <v-sheet color="grey-darken-3" class="d-flex align-center justify-center fill-height">

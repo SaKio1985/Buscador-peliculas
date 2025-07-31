@@ -30,7 +30,7 @@ const handleCardClick = (item) => {
     md="4"
   >
     <!-- Al hacer clic en la tarjeta, llamamos a nuestra función local -->
-    <MovieCard :result="result" @click="handleCardClick(result)" />
+    <MovieCard :result="result" @cardclick="handleCardClick(result)" />
   </v-col>
 </template>
 
