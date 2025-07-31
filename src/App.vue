@@ -8,6 +8,8 @@ import { searchJikan, getJikanDetails } from '@/services/jikan.js'
 import { adaptSearchResults, adaptDetails } from '@/services/dataAdapter.js'
 import HomeButton from '@/components/HomeButton.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import MoviesContainer from '@/components/MoviesContainer.vue'
+import MovieDetails from '@/components/MovieDetails.vue'
 
 // --- Estado de la aplicación ---
 const searchTerm = ref('')
@@ -82,7 +84,34 @@ const handleSearch = async () => {
   }
 }
 
-const getDetails = async (item) => {
+/* const getDetails = async (item) => {
+  loading.value = true
+  selectedItem.value = null
+  error.value = null
+  try {
+    let rawDetails
+    switch (item.source) {
+      case 'omdb':
+        rawDetails = await getOMDbDetails(item.id)
+        break
+      case 'tmdb':
+        rawDetails = await getTMDBDetails(item.id)
+        break
+      case 'jikan':
+        rawDetails = await getJikanDetails(item.id)
+        break
+    }
+    selectedItem.value = adaptDetails(rawDetails, item.source)
+    searchResults.value = []
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+} */
+
+// Esta función ahora será llamada por el evento de MoviesContainer
+const handleItemSelected = async (item) => {
   loading.value = true
   selectedItem.value = null
   error.value = null
@@ -148,14 +177,6 @@ const getDetails = async (item) => {
                     api="omdb"
                     @selectSearchSource="selectSearchSource"
                   />
-                  <!--                   <v-card @click="selectSearchSource('omdb')" class="source-card" hover>
-                    <div class="d-flex justify-center align-center my-4" style="height: 80px">
-                      <h2 class="text-h4 font-weight-black">OMDb</h2>
-                    </div>
-                    <v-card-text class="text-center font-weight-bold">
-                      Películas (omdb)
-                    </v-card-text>
-                  </v-card> -->
                 </v-col>
 
                 <!-- Botón Jikan (MyAnimeList) -->
@@ -166,10 +187,6 @@ const getDetails = async (item) => {
                     api="jikan"
                     @selectSearchSource="selectSearchSource"
                   />
-                  <!--                   <v-card @click="selectSearchSource('jikan')" class="source-card" hover>
-                    <v-img src="/images/mal-logo.avif" contain height="80" class="my-4"></v-img>
-                    <v-card-text class="text-center font-weight-bold"> Anime </v-card-text>
-                  </v-card> -->
                 </v-col>
               </v-row>
             </div>
@@ -200,27 +217,6 @@ const getDetails = async (item) => {
                 Volver a los resultados
               </v-btn>
 
-              <!-- Formulario de Búsqueda -->
-              <!--    <form v-if="!selectedItem" @submit.prevent="handleSearch" class="d-flex ga-2 mb-8">
-                <v-text-field
-                  v-model="searchTerm"
-                  :label="placeholderText"
-                  variant="solo-filled"
-                  hide-details
-                  clearable
-                  autofocus
-                  @keydown.enter="handleSearch"
-                ></v-text-field>
-                <v-btn
-                  type="submit"
-                  color="primary"
-                  size="large"
-                  :loading="loading"
-                  :disabled="loading"
-                >
-                  Buscar
-                </v-btn>
-              </form> -->
               <SearchBar
                 v-if="!selectedItem"
                 v-model="searchTerm"
@@ -242,114 +238,14 @@ const getDetails = async (item) => {
 
               <!-- Lista de Resultados de Búsqueda -->
               <v-row v-if="searchResults.length > 0" dense>
-                <v-col
-                  v-for="result in searchResults"
-                  :key="`${result.source}-${result.id}`"
-                  cols="12"
-                  sm="6"
-                  md="4"
-                >
-                  <v-card @click="getDetails(result)" hover class="fill-height d-flex flex-column">
-                    <v-img :src="result.poster" aspect-ratio="2/3" cover>
-                      <template v-slot:error>
-                        <v-sheet
-                          color="grey-darken-3"
-                          class="d-flex align-center justify-center fill-height"
-                        >
-                          <div class="text-center">
-                            <v-icon icon="mdi-movie-off" size="x-large"></v-icon>
-                            <div class="text-caption mt-2">Sin Póster</div>
-                          </div>
-                        </v-sheet>
-                      </template>
-                    </v-img>
-                    <div class="d-flex flex-column flex-grow-1 pa-2">
-                      <v-card-title class="text-subtitle-1">{{ result.title }}</v-card-title>
-                      <v-card-subtitle>{{ result.year }}</v-card-subtitle>
-                      <v-spacer></v-spacer>
-                      <v-card-actions>
-                        <v-chip
-                          size="small"
-                          prepend-icon="mdi-television-play"
-                          class="text-capitalize"
-                          >{{ result.type }}</v-chip
-                        >
-                      </v-card-actions>
-                    </div>
-                  </v-card>
-                </v-col>
+                <MoviesContainer
+                  :searchResults="searchResults"
+                  @item-selected="handleItemSelected"
+                />
               </v-row>
+              <MovieDetails :selectedItem="selectedItem" :loading="loading" />
 
               <!-- Tarjeta de Detalles del Item Seleccionado -->
-              <v-card v-if="selectedItem" :loading="loading" class="mt-4">
-                <v-row no-gutters>
-                  <v-col cols="12" md="4">
-                    <v-img :src="selectedItem.poster" cover class="fill-height">
-                      <template v-slot:error>
-                        <v-sheet
-                          color="grey-darken-3"
-                          class="d-flex align-center justify-center fill-height"
-                        >
-                          <div class="text-center">
-                            <v-icon icon="mdi-movie-off" size="x-large"></v-icon>
-                          </div>
-                        </v-sheet>
-                      </template>
-                    </v-img>
-                  </v-col>
-                  <v-col cols="12" md="8">
-                    <v-card-title class="text-h4 mt-2">{{ selectedItem.title }}</v-card-title>
-                    <v-card-subtitle class="text-h6"
-                      >{{ selectedItem.year }} · {{ selectedItem.genre }}</v-card-subtitle
-                    >
-                    <v-card-text>
-                      <div class="d-flex flex-wrap ga-2 my-4">
-                        <v-chip
-                          v-for="(rating, index) in selectedItem.ratings"
-                          :key="index"
-                          variant="outlined"
-                          prepend-icon="mdi-star-circle"
-                        >
-                          <strong>{{ rating.source }}:</strong> {{ rating.value }}
-                        </v-chip>
-                      </div>
-                      <h3 class="text-h6 text-primary mb-2">Sinopsis</h3>
-                      <p class="text-body-1">{{ selectedItem.plot }}</p>
-                      <div class="mt-4 text-body-2">
-                        <div v-if="selectedItem.director">
-                          <strong>Director/Estudio:</strong> {{ selectedItem.director }}
-                        </div>
-                        <div v-if="selectedItem.actors">
-                          <strong>Actores/Personajes:</strong> {{ selectedItem.actors }}
-                        </div>
-                        <div v-if="selectedItem.cast && selectedItem.cast.length > 0" class="mt-6">
-                          <h3 class="text-h6 text-primary mb-4">Reparto Principal</h3>
-                          <v-slide-group show-arrows>
-                            <v-slide-group-item
-                              v-for="(actor, index) in selectedItem.cast"
-                              :key="index"
-                            >
-                              <div class="actor-card text-center mx-2">
-                                <v-avatar size="80">
-                                  <v-img :src="actor.photo" :alt="actor.name">
-                                    <template v-slot:error>
-                                      <v-icon color="grey-darken-1" size="60"
-                                        >mdi-account-circle</v-icon
-                                      >
-                                    </template>
-                                  </v-img>
-                                </v-avatar>
-                                <div class="actor-name mt-2">{{ actor.name }}</div>
-                                <div class="character-name text-caption">{{ actor.character }}</div>
-                              </div>
-                            </v-slide-group-item>
-                          </v-slide-group>
-                        </div>
-                      </div>
-                    </v-card-text>
-                  </v-col>
-                </v-row>
-              </v-card>
             </div>
 
             <div
