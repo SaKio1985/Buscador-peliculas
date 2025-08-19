@@ -34,7 +34,7 @@ const searchTerm = computed({
 // Función para manejar el envío del formulario
 const handleSubmit = () => {
   // Emitimos el evento 'search' cuando el usuario envía la búsqueda
-  emit('search')
+  emit('search', searchTerm.value)
 }
 </script>
 

@@ -7,7 +7,11 @@ import { searchOMDb, getOMDbDetails } from '@/services/omdb.js'
 import { searchTMDB, getTMDBDetails } from '@/services/tmdb.js'
 import { searchJikan, getJikanDetails } from '@/services/jikan.js'
 import { adaptSearchResults, adaptDetails } from '@/services/dataAdapter.js'
+import { useRouter, useRoute } from 'vue-router'
 
+const router = useRouter()
+const route = useRoute()
+const searchType = route.params.type
 const searchTerm = ref('')
 const loading = ref(false)
 const error = ref(null)
@@ -20,8 +24,11 @@ const placeholderText = computed(() => {
   if (searchType.value === 'jikan') return 'Buscar anime...' */
   return 'Buscar...'
 })
-const handleSearch = async () => {
-  if (searchTerm.value.trim() === '') {
+
+const handleSearch = async (searchTerm) => {
+  console.log(searchTerm)
+  /*  searchTerm.value = searchTerm */
+  if (searchTerm === '') {
     error.value = 'Por favor, escribe un término de búsqueda.'
     return
   }
@@ -32,18 +39,24 @@ const handleSearch = async () => {
 
   try {
     let rawResults
-    switch (searchType.value) {
+    switch (searchType) {
       case 'omdb':
-        rawResults = await searchOMDb(searchTerm.value)
+        console.log('buscando  en OMDB')
+        rawResults = await searchOMDb(searchTerm)
+        console.log(rawResults)
         break
       case 'tmdb':
-        rawResults = await searchTMDB(searchTerm.value)
+        console.log('buscando  en TMDB')
+        rawResults = await searchTMDB(searchTerm)
+        console.log(rawResults)
         break
       case 'jikan':
-        rawResults = await searchJikan(searchTerm.value)
+        console.log('buscando  en Jikan')
+        rawResults = await searchJikan(searchTerm)
+        console.log(rawResults)
         break
     }
-    searchResults.value = adaptSearchResults(rawResults, searchType.value)
+    searchResults.value = adaptSearchResults(rawResults, searchType)
     if (searchResults.value.length === 0) {
       error.value = 'No se encontraron resultados para tu búsqueda.'
     }
@@ -77,6 +90,9 @@ const handleItemSelected = async (item) => {
   } finally {
     loading.value = false
   }
+}
+const goBack = () => {
+  router.push('/')
 }
 </script>
 
