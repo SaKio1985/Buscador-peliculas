@@ -9,10 +9,6 @@ const selectSearchSource = (source) => {
   console.log(source)
   router.push(`/search/${source}`)
   searchType.value = source
-  /*   // Limpiamos todo para una nueva sesión de búsqueda
-/*   error.value = null
-  searchResults.value = []
-  selectedItem.value = null */
 }
 
 const searchType = ref(null)

@@ -17,7 +17,7 @@ const router = createRouter({
     },
     {
       // La ruta de detalles tendrá la fuente y el ID en la URL
-      path: '/details',
+      path: '/details/:type/:id',
       name: 'details',
       component: () => import('@/views/DetailsView.vue'), // Lazy loading
     },
