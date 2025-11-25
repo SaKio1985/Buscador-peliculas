@@ -1,15 +1,16 @@
-# 🎬 Buscador Peliculas y Anime
+# 🎬 Buscador de Películas y Anime
 
 <div align="center">
   <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" alt="Vue.js">
   <img src="https://img.shields.io/badge/Vuetify-1867C0?style=for-the-badge&logo=vuetify&logoColor=white" alt="Vuetify">
   <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Vue_Router-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue Router">
 </div>
 
 <div align="center">
   <h3>🚀 Buscador Universal de Películas y Anime</h3>
-  <p>Una aplicación moderna construida con Vue 3, Vuetify y Vite que integra múltiples APIs para buscar películas y anime.</p>
+  <p>Una aplicación moderna construida con Vue 3, Vuetify 3 y Vite que integra múltiples APIs para buscar películas y anime con información detallada del reparto y calificaciones.</p>
 </div>
 
 <div align="center">
@@ -25,24 +26,31 @@
 
 ### 🎯 Funcionalidades Principales
 
-- **Búsqueda Múltiple**: Integra 3 APIs diferentes para una experiencia completa
-- **Interfaz Moderna**: Diseño responsive con Material Design 3
-- **Detalles Completos**: Información detallada con reparto, calificaciones y sinopsis
-- **Navegación Intuitiva**: Flujo de usuario optimizado con navegación por pasos
+- **Búsqueda Múltiple**: Integra 3 APIs diferentes (TMDB, OMDb, Jikan) para una experiencia completa
+- **Interfaz Moderna**: Diseño responsive con Material Design 3 y tema oscuro
+- **Detalles Completos**: Información detallada con reparto, calificaciones, sinopsis y géneros
+- **Navegación Intuitiva**: Sistema de rutas con Vue Router para una navegación fluida
+- **Imágenes Optimizadas**: Uso de formato AVIF para logos y capturas de pantalla
+- **Reparto Visual**: Visualización de actores/personajes con fotos y nombres de personajes
+- **Adaptador de Datos**: Sistema unificado que normaliza datos de diferentes APIs
 
 ### 🔍 Fuentes de Datos
 
-- **🎬 TMDB (The Movie Database)**: Películas en español con información completa del reparto
-- **🎭 OMDb (Open Movie Database)**: Películas en inglés con múltiples calificaciones
-- **🎌 Jikan (MyAnimeList)**: Anime con personajes y seiyuus
+- **🎬 TMDB (The Movie Database)**: Películas en español con información completa del reparto, fotos de actores y calificaciones
+- **🎭 OMDb (Open Movie Database)**: Películas en inglés con múltiples calificaciones (IMDb, Rotten Tomatoes, Metacritic)
+- **🎌 Jikan (MyAnimeList)**: Anime con personajes principales, seiyuus (actores de voz japoneses) y calificaciones de MAL
 
 ### 🛠️ Tecnologías
 
-- **Frontend**: Vue 3 con Composition API
-- **UI Framework**: Vuetify 3 (Material Design 3)
-- **Build Tool**: Vite
-- **Package Manager**: pnpm
-- **HTTP Client**: Fetch API nativo
+- **Frontend Framework**: Vue 3 con Composition API y `<script setup>`
+- **UI Framework**: Vuetify 3 (Material Design 3) con tema oscuro personalizado
+- **Build Tool**: Vite 7 para desarrollo rápido y builds optimizados
+- **Package Manager**: pnpm para gestión eficiente de dependencias
+- **Routing**: Vue Router 4 para navegación SPA
+- **HTTP Client**: Fetch API nativo para llamadas a APIs externas
+- **Iconos**: Material Design Icons (@mdi/font)
+- **Linting**: ESLint + Oxlint para calidad de código
+- **Formato**: Prettier para consistencia de código
 
 ---
 
@@ -123,6 +131,22 @@ pnpm build
 pnpm preview
 ```
 
+### 🧹 Linting y Formato
+
+```bash
+# Ejecutar linting con Oxlint
+pnpm lint:oxlint
+
+# Ejecutar linting con ESLint
+pnpm lint:eslint
+
+# Ejecutar todos los linters
+pnpm lint
+
+# Formatear código con Prettier
+pnpm format
+```
+
 ---
 
 ## 🏗️ Arquitectura del Proyecto
@@ -130,27 +154,48 @@ pnpm preview
 ```
 src/
 ├── components/           # Componentes Vue reutilizables
+│   ├── HomeButton.vue   # Botón de selección de fuente de datos
+│   ├── MovieCard.vue    # Tarjeta de película/anime en resultados
+│   ├── MovieDetails.vue # Componente de detalles con reparto
+│   ├── MoviesContainer.vue # Contenedor de resultados
+│   └── SearchBar.vue    # Barra de búsqueda
+├── views/               # Vistas de las páginas
+│   ├── HomeView.vue     # Página principal con selección de API
+│   ├── SearchView.vue   # Página de búsqueda y resultados
+│   └── DetailsView.vue  # Página de detalles de película/anime
 ├── services/            # Servicios de API y adaptadores
 │   ├── omdb.js         # Servicio OMDb API
 │   ├── tmdb.js         # Servicio TMDB API
 │   ├── jikan.js        # Servicio Jikan API
 │   └── dataAdapter.js  # Adaptador de datos unificado
+├── router/             # Configuración de Vue Router
+│   └── index.js        # Definición de rutas
 ├── plugins/            # Configuración de plugins
-│   └── vuetify.js      # Configuración Vuetify
+│   └── vuetify.js      # Configuración Vuetify con tema oscuro
 ├── App.vue             # Componente principal
 └── main.js             # Punto de entrada
+
+public/
+└── images/             # Recursos de imágenes
+    ├── LogoWeb.avif    # Logo principal de la aplicación
+    ├── tmdb-logo.avif  # Logo de TMDB
+    ├── omdb-logo.avif  # Logo de OMDb
+    ├── mal-logo.avif   # Logo de MyAnimeList
+    └── screenshots/    # Capturas de pantalla de la app
 ```
 
 ### 🔄 Flujo de Datos
 
 ```mermaid
 graph TD
-    A[Selección de Fuente] --> B[Formulario de Búsqueda]
-    B --> C[Llamada a API]
-    C --> D[Adaptador de Datos]
-    D --> E[Resultados de Búsqueda]
-    E --> F[Detalles del Item]
-    F --> G[Vista de Detalles]
+    A["HomeView: Selección de Fuente"] --> B["SearchView: Formulario de Búsqueda"]
+    B --> C["Servicio API (TMDB/OMDb/Jikan)"]
+    C --> D["dataAdapter: Normalización de Datos"]
+    D --> E["MoviesContainer: Resultados"]
+    E --> F["MovieCard: Click en Película/Anime"]
+    F --> G["DetailsView: Llamada a API de Detalles"]
+    G --> H["dataAdapter: Adaptación de Detalles"]
+    H --> I["MovieDetails: Vista Completa con Reparto"]
 ```
 
 ---
@@ -293,22 +338,34 @@ Las solicitudes de nuevas características son bienvenidas. Abre un issue etique
 
 ## 🚀 Roadmap
 
-### 📅 Próximas Funcionalidades
+### ✅ Funcionalidades Implementadas
 
-- [ ] 🔍 Búsqueda avanzada con filtros
-- [ ] ⭐ Sistema de favoritos
-- [ ] 📱 Aplicación móvil (React Native)
-- [ ] 🎨 Temas personalizables
-- [ ] 🔄 Sincronización con servicios de streaming
+- [x] Integración con 3 APIs diferentes (TMDB, OMDb, Jikan)
+- [x] Sistema de rutas dinámicas con Vue Router
+- [x] Adaptador de datos unificado para normalizar respuestas de APIs
+- [x] Visualización de reparto con fotos (actores para películas, personajes para anime)
+- [x] Diseño responsive con Vuetify 3
+- [x] Tema oscuro personalizado
+- [x] Imágenes optimizadas en formato AVIF
+- [x] Manejo de HTML en respuestas de APIs (v-html para categorías y respuestas)
+
+### � Próximas Funcionalidades
+
+- [ ] 🔍 Búsqueda avanzada con filtros (año, género, calificación)
+- [ ] ⭐ Sistema de favoritos con almacenamiento local
+- [ ] 🎨 Temas personalizables (claro/oscuro/personalizado)
+- [ ] 🔄 Historial de búsquedas
 - [ ] 📊 Estadísticas de búsqueda
-- [ ] 🌐 Soporte para más idiomas
+- [ ] � Soporte para más idiomas (i18n)
+- [ ] 📱 PWA (Progressive Web App) para instalación en dispositivos
 
 ### 🎯 Versión 2.0
 
-- **Series de TV**: Integración con APIs de series
+- **Series de TV**: Integración con APIs de series y programas de televisión
 - **Modo Offline**: Cache local con Service Workers
-- **Recomendaciones**: Sistema de recomendaciones basado en ML
-- **Social**: Compartir y comentar películas
+- **Recomendaciones**: Sistema de recomendaciones basado en preferencias
+- **Social**: Compartir y comentar películas/anime con otros usuarios
+- **Listas Personalizadas**: Crear y gestionar listas personalizadas
 
 ---
 
